@@ -1,0 +1,111 @@
+go atlas
+
+mesh 
+x.m		l=0	spac=0.2
+x.m		l=2	spac=0.2
+x.m		l=3.5	spac=0.2
+x.m		l=5	spac=0.2
+x.m		l=10	spac=0.2
+x.m		l=15.	spac=0.2
+x.m		l=16.5	spac=0.2
+x.m		l=18	spac=0.2
+x.m		l=20	spac=0.2
+x.m		l=25	spac=0.2
+x.m		l=30	spac=0.2
+
+
+#
+y.m		l=0    	 spac=0.001
+#y.m		l=0.0015    	 spac=0.001
+y.m		l=0.003    	 spac=0.001
+y.m           l=0.03        spac=0.001
+y.m		l=0.073 	 spac=0.001
+y.m		l=0.1455	 spac=0.0075
+y.m		l=0.218	 spac=0.25
+y.m		l=1.218	 spac=0.25
+y.m		l=2.218	 spac=0.25
+y.m		l=3.218	 spac=0.25
+
+
+#
+#  **************** regions ****************
+#             1=oxide  2=silicon 3-oxide
+#
+region       num=1    y.min=0.     y.max=0.073          material=silicon
+region       num=2    y.min=0.073  y.max=0.218          material=oxide
+region       num=3    y.min=0.218  y.max=3.218          material=silicon
+#
+#  **************** electrodes ****************
+#    1=gate  2=substrate  3=source  4=drain
+#
+elec  num=1  x.min=0.   x.max=30.   y.min=3.218       y.max=3.218       name=gate 
+elec  num=2  x.min=0.   x.max=5.    y.min=0           y.max=0           name=source 
+elec  num=3  x.min=25.  x.max=30.   y.min=0           y.max=0           name=drain
+    
+#save outf=Sionly.str
+#tonyplot Sionly.str 
+#  **************** doping profiles  ****************
+
+doping     reg=1  uniform conc=1.e15 p.type
+doping     reg=3  uniform conc=1.e15 p.type
+
+
+
+material material=silicon  nc300=2.8e19 \
+ nv300=1.04e19 eg300=1.08 taun0=1e-7 taup0=1e-7
+
+save outf=Sionly.str
+tonyplot Sionly.str
+
+MODELS
+MOBILITY SHI.P
+models  auger conmob srh temp=300 bgn  
+
+
+method newton
+solve init
+save outf=Sionly.str
+
+tonyplot  Sionly.str -set Sionly.set
+
+method  gummel newton 
+solve  vdrain=0
+solve  vdrain=0.001
+solve  vdrain=0.002
+solve  vdrain=0.006
+solve  vdrain=0.01
+solve  vdrain=0.02
+solve  vdrain=1
+
+save outf=Sionly.str
+
+tonyplot  Sionly.str -set Sionly.set
+
+
+solve  vgate=0
+solve  vgate=-0.001
+solve  vgate=-0.002
+solve  vgate=-0.05
+solve  vgate=-0.5
+
+log outf=Sionly.log
+
+solve  vgate=0 vfinal=-10 vstep=-0.5 name=gate vdrain=1
+
+tonyplot Sionly.log
+
+save outf=Sionly.str
+
+tonyplot  Sionly.str -set Sionly.set
+
+
+
+quit
+
+
+
+
+
+
+
+
